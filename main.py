@@ -3,17 +3,23 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Definimos qué datos esperamos del ESP32
-class DatosIoT(BaseModel):
+# Esto define la estructura de tu JSON de Wokwi
+class DatosSensor(BaseModel):
     sensor: str
     valor: float
 
 @app.get("/")
 def inicio():
-    return {"mensaje": "Servidor activo. Listo para recibir datos del ESP32"}
+    return {"mensaje": "Servidor activo"}
 
-# Esta es la "puerta" que falta para corregir el error 405
+# Esta es la función que recibirá el POST de Wokwi
 @app.post("/")
-async def recibir_datos(datos: DatosIoT):
-    print(f"Dato recibido de {datos.sensor}: {datos.valor}")
-    return {"estado": "recibido", "valor": datos.valor}
+async def recibir_datos(datos: DatosSensor):
+    # Esto aparecerá en los LOGS de Seenode
+    print(f"LECTURA RECIBIDA: {datos.sensor} -> {datos.valor}")
+    
+    return {
+        "estado": "Exito",
+        "mensaje": "Dato guardado en la nube de Seenode",
+        "dato_recibido": datos.valor
+    }
