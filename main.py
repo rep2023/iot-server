@@ -23,5 +23,3 @@ async def recibir_datos(datos: DatosSensor):
         "mensaje": "Dato guardado en la nube de Seenode",
         "dato_recibido": datos.valor
     }
-
-   
