@@ -3,23 +3,37 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Esto define la estructura de tu JSON de Wokwi
+# Variable global simple (en memoria) para controlar la lámpara
+# En un proyecto real usarías una base de datos
+estado_dispositivos = {
+    "lampara": "OFF",
+    "motor_velocidad": 0
+}
+
 class DatosSensor(BaseModel):
     sensor: str
     valor: float
 
 @app.get("/")
 def inicio():
-    return {"mensaje": "Servidor activo"}
+    return {"mensaje": "Servidor de IoT activo", "estado_actual": estado_dispositivos}
 
-# Esta es la función que recibirá el POST de Wokwi
+# 1. El ESP32 envía datos aquí
 @app.post("/")
 async def recibir_datos(datos: DatosSensor):
-    # Esto aparecerá en los LOGS de Seenode
     print(f"LECTURA RECIBIDA: {datos.sensor} -> {datos.valor}")
     
+    # Respondemos al ESP32 y de paso le decimos qué debe hacer con la lámpara
     return {
         "estado": "Exito",
-        "mensaje": "Dato guardado en la nube de Seenode",
+        "accion_lampara": estado_dispositivos["lampara"],
         "dato_recibido": datos.valor
     }
+
+# 2. Tú usas esta ruta para encender/apagar la lámpara desde tu navegador
+@app.get("/control/{dispositivo}/{accion}")
+def controlar(dispositivo: str, accion: str):
+    if dispositivo in estado_dispositivos:
+        estado_dispositivos[dispositivo] = accion.upper()
+        return {"mensaje": f"{dispositivo} actualizado a {accion}"}
+    return {"error": "Dispositivo no encontrado"}
