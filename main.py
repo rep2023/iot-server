@@ -22,6 +22,7 @@ def inicio():
 @app.post("/")
 async def recibir_datos(datos: DatosSensor):
     print(f"LECTURA RECIBIDA: {datos.sensor} -> {datos.valor}")
+    print("Hola Ayacucho")
     
     # Respondemos al ESP32 y de paso le decimos qué debe hacer con la lámpara
     return {
